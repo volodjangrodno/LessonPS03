@@ -1,5 +1,8 @@
 from bs4 import BeautifulSoup
 import requests
+from googletrans import Translator
+
+translator = Translator()
 
 
 # Создаём функцию, которая будет получать информацию
@@ -20,8 +23,8 @@ def get_english_words():
             "word_definition": word_definition
         }
     # Функция, которая сообщит об ошибке, но не остановит программу
-    except:
-        print("Произошла ошибка")
+    except Exception as e:
+        print(f"Произошла ошибка: {e}")
 
 
 # Создаём функцию, которая будет делать саму игру
@@ -30,20 +33,35 @@ def word_game():
     while True:
         # Создаём функцию, чтобы использовать результат функции-словаря
         word_dict = get_english_words()
+        if word_dict is None:
+            continue
+
         word = word_dict.get("english_words")
         word_definition = word_dict.get("word_definition")
 
+        translate_word_definition = translator.translate(word_definition, dest="ru")
+
         # Начинаем игру
         print(f"Значение слова - {word_definition}")
+        print(f"Перевод значения слова - {translate_word_definition.text}")
         user = input("Что это за слово? ")
-        if user == word:
+
+        # Переводим ответ игрока на английский
+        translated_user_answer = translator.translate(user, dest="en").text.lower()
+
+        if translated_user_answer == word.lower():
             print("Все верно!")
         else:
             print(f"Ответ неверный, было загадано это слово - {word}")
+            translate_word = translator.translate(word, dest="ru")
+            print(f"Перевод загаданного слова - {translate_word.text}")
 
         # Создаём возможность закончить игру
-        play_again = input("Хотите сыграть еще раз? y/n")
-        if play_again != "y":
+
+        play_again = input("Хотите сыграть еще раз? y/n\n")
+
+
+        if play_again.lower != "y":
             print("Спасибо за игру!")
             break
 
